@@ -8,25 +8,25 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using StatusServer.ServerListPing.Standard;
-
+using Vintagestory.API.Common;
 
 namespace StatusServer.ServerListPing
 {
     public class StatusTcpServer : IStatusServer
     {
-        private static TcpListener _listener;
+        private readonly ILogger _logger;
+        private readonly TcpListener _listener;
+
+        public System.Func<StatusPayload> GetStatusPayload { get; set; }
         
-        public Func<StatusPayload> GetStatusPayload { get; set; }
-        
-        public StatusTcpServer(ushort port)
+        public StatusTcpServer(ILogger logger, ushort port)
         {
+            _logger = logger;
             _listener = new TcpListener(IPAddress.Any, port);
         }
         
         public async void Start()
         {
-            if (GetStatusPayload == null) return;
-
             _listener.Start();
 
             try
@@ -35,10 +35,11 @@ namespace StatusServer.ServerListPing
             }
             catch (Exception e)
             {
-                if (e is SocketException || e is ObjectDisposedException) 
+                if (e is ObjectDisposedException)
                     return;
 
-                throw;
+                _logger.Error(e.Message + e.StackTrace);
+                _logger.Notification("Status server stopped due an exception");
             }
         }
 
@@ -82,7 +83,8 @@ namespace StatusServer.ServerListPing
                     client.Close();
                 }
                 catch (TargetInvocationException) { }
-                catch (EndOfStreamException) { }
+                catch (IOException) { }
+                catch (SocketException) { }
             }
         }
         
@@ -117,7 +119,7 @@ namespace StatusServer.ServerListPing
         /// <summary>
         /// https://wiki.vg/Protocol#Packet_format
         /// </summary>
-        private static async void SendPacket(NetworkStream stream, byte packetID, byte[] payload)
+        private void SendPacket(NetworkStream stream, byte packetID, byte[] payload)
         {
             var buffer = new MemoryStream();
             var writer = new BinaryWriter(buffer);
@@ -126,7 +128,7 @@ namespace StatusServer.ServerListPing
             writer.Write(payload);
             
             var output = buffer.ToArray();
-            await stream.WriteAsync(output, 0, output.Length);
+            stream.Write(output, 0, output.Length);
         }
 
         /// <summary>

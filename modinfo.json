@@ -2,7 +2,7 @@
 	"type": "code",
 	"name": "Status Server",
 	"modid": "statusserver",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"side": "server",
 	
 	"description" : "Provides game server information via Server List Ping protocol",

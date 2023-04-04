@@ -45,33 +45,33 @@ namespace StatusServer
                     Convert.ToBase64String(File.ReadAllBytes(config.IconFile)));
             }
 
-            try
-            {
-                _statusServer = new StatusTcpServer(config.Port);
-                _statusServer.GetStatusPayload = () => {
-                    var players = api.World.AllOnlinePlayers
-                        .Select(player => new PlayerPayload(player.PlayerName, player.PlayerUID))
-                        .ToArray();
-            
-                    payload.Players.Online = players.Length;
-                    payload.Players.Sample = players;
+            _statusServer = new StatusTcpServer(Mod.Logger, config.Port);
+            _statusServer.GetStatusPayload = () => {
+                var players = api.World.AllOnlinePlayers
+                    .Select(player => new PlayerPayload(player.PlayerName, player.PlayerUID))
+                    .ToArray();
+        
+                payload.Players.Online = players.Length;
+                payload.Players.Sample = players;
 
-                    if (config.EnabledExtensions.Contains("world"))
+                if (config.EnabledExtensions.Contains("world"))
+                {
+                    payload.World = new WorldPayload
                     {
-                        payload.World = new WorldPayload
-                        {
-                            Datetime = api.World.Calendar.PrettyDate(),
-                        };
-                    }
-                    
-                    return payload;
-                };
+                        Datetime = api.World.Calendar.PrettyDate(),
+                    };
+                }
                 
+                return payload;
+            };
+
+            try {
                 _statusServer.Start();
             }
             catch (Exception e)
             {
-                Mod.Logger.Error(e.StackTrace);
+                Mod.Logger.Error(e.Message + e.StackTrace);
+                return;
             }
 
             Mod.Logger.Notification(Lang.Get("Status server started on port {0}", config.Port));
