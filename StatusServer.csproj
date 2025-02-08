@@ -1,10 +1,10 @@
-<Project DefaultTargets="CustomBuild" Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <LangVersion>5</LangVersion>
+        <LangVersion>6</LangVersion>
         <RootNamespace>StatusServer</RootNamespace>
-        <Version>1.0.1</Version>
+        <Version>1.0.2</Version>
     </PropertyGroup>
 
     <ItemGroup>
@@ -17,22 +17,17 @@
             <Private>false</Private>
         </Reference>
     </ItemGroup>
-    
-    <Target Name="CustomBuild">
-        <CallTarget Targets="Build" Condition="'$(Configuration)' == 'Debug'" />
-        <CallTarget Targets="Zip" Condition="'$(Configuration)' == 'Release'" />
-    </Target>
 
-    <Target Name="Zip">
-        
-        <ItemGroup>
-            <Src Include="src\**">
-                <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            </Src>
-        </ItemGroup>
-        <Copy SourceFiles="@(Src)" DestinationFiles="@(Src->'$(OutDir)\temp\src\%(RecursiveDir)%(Filename)%(Extension)')" />
-        <Copy SourceFiles="modinfo.json" DestinationFolder="$(OutputPath)\temp" />
-        <ZipDirectory DestinationFile="$(OutDir)/$(AssemblyName)_v$(Version).zip" SourceDirectory="$(OutDir)\temp" Overwrite="true" />
-        <RemoveDir Directories="$(OutDir)\temp" />
+    <ItemGroup>
+        <None Include="modinfo.json" CopyToOutputDirectory="PreserveNewest"/>
+    </ItemGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <DebugType>None</DebugType>
+        <GenerateDependencyFile>false</GenerateDependencyFile>
+    </PropertyGroup>
+
+    <Target Name="Zip" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+        <ZipDirectory DestinationFile="bin\$(Configuration)\$(AssemblyName)_v$(Version).zip" SourceDirectory="$(OutDir)" Overwrite="true" />
     </Target>
 </Project>

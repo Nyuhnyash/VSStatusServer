@@ -18,13 +18,9 @@ via popular [Server List Ping](https://wiki.vg/Server_List_Ping) protocol.
 
 ## Build
 - Set `VINTAGE_STORY` environment variable to your game directory.
-- To get [source zip](https://wiki.vintagestory.at/index.php/Modding:Setting_up_your_Development_Environment#Project_Setup_(ZIP)) type mod
+- Get ready-to-publish mod as zip archive
 ```shell
 dotnet build -c Release
-```
-- To get [DLL](https://wiki.vintagestory.at/index.php/Modding:Setting_up_your_Development_Environment#Project_Setup_(DLL)) type mod (For debug purposes)
-```shell
-dotnet build
 ```
 
 ## Usage example

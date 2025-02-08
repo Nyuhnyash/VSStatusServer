@@ -34,7 +34,7 @@ namespace StatusServer
             
             var payload = new ExtendedStatusPayload
             {
-                Version = GameVersion.ShortGameVersion,
+                Version = (string)typeof(GameVersion).GetField(nameof(GameVersion.ShortGameVersion)).GetRawConstantValue(),
                 Players = new PlayersPayload { Max = api.Server.Config.MaxClients },
                 Description = api.Server.Config.ServerName,
             };
@@ -77,8 +77,6 @@ namespace StatusServer
             Mod.Logger.Notification(Lang.Get("Status server started on port {0}", config.Port));
 
         }
-
-        public override bool AllowRuntimeReload { get { return true; } }
 
         public override void Dispose()
         {
