@@ -1,10 +1,10 @@
-﻿namespace StatusServer.ServerListPing.Standard
+namespace StatusServer.ServerListPing.Standard
 {
     public class VersionPayload
     {
-        public readonly int Protocol = 2000;
+        public int Protocol { get; } = 2000;
 
-        public string Name;
+        public string Name { get; set; }
 
         public static implicit operator VersionPayload(string name)
         {

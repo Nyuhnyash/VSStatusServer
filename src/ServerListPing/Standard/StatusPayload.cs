@@ -1,16 +1,16 @@
-﻿namespace StatusServer.ServerListPing.Standard
+namespace StatusServer.ServerListPing.Standard
 {
     public class StatusPayload
     {
-        public VersionPayload Version;
+        public VersionPayload Version { get; set; }
 
-        public PlayersPayload Players;
+        public PlayersPayload Players { get; set; }
         
-        public DescriptionPayload Description;
+        public DescriptionPayload Description { get; set; }
 
         /// <summary>
         /// Server icon, encoded in Base64
         /// </summary>
-        public string Favicon;
+        public string Favicon { get; set; }
     }
 }

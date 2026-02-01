@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 
 namespace StatusServer.ServerListPing.Standard
 {
     public class PlayersPayload
     {
-        public int Max;
+        public int Max { get; set; }
 
-        public int Online;
+        public int Online { get; set; }
 
-        public IEnumerable<PlayerPayload> Sample;
+        public IEnumerable<PlayerPayload> Sample { get; set; }
     }
 }

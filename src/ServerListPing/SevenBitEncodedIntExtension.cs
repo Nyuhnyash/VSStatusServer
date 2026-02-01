@@ -1,28 +1,53 @@
-﻿using System.IO;
-using System.Reflection;
+using System.IO;
 
 
 namespace StatusServer.ServerListPing
 {
     /// <summary>
-    /// These methods became public only since .NET 5
+    /// VarInt encoding/decoding for Minecraft protocol.
+    /// Direct implementation without reflection for maximum performance.
     /// </summary>
     public static class SevenBitEncodedIntExtension
     {
+        /// <summary>
+        /// Reads a VarInt (7-bit encoded integer) from the stream.
+        /// </summary>
         public static int Read7BitEncodedInt(this BinaryReader reader)
         {
-            return (int)typeof(BinaryReader).InvokeMember("Read7BitEncodedInt",
-                BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.InvokeMethod
-                | BindingFlags.Public, // .NET5+
-                null, reader,  null);
+            int result = 0;
+            int shift = 0;
+            byte b;
+            
+            do
+            {
+                b = reader.ReadByte();
+                result |= (b & 0x7F) << shift;
+                shift += 7;
+                
+                // VarInt can be at most 5 bytes (for 32-bit int)
+                if (shift > 35)
+                {
+                    throw new IOException("VarInt is too large");
+                }
+            } while ((b & 0x80) != 0);
+            
+            return result;
         }
 
+        /// <summary>
+        /// Writes a VarInt (7-bit encoded integer) to the stream.
+        /// </summary>
         public static void Write7BitEncodedInt(this BinaryWriter writer, int value)
-        { 
-            typeof(BinaryWriter).InvokeMember("Write7BitEncodedInt",
-                BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.InvokeMethod
-                | BindingFlags.Public, // .NET5+
-                null, writer, new object[] { value });
+        {
+            uint v = (uint)value;
+            
+            while (v >= 0x80)
+            {
+                writer.Write((byte)(v | 0x80));
+                v >>= 7;
+            }
+            
+            writer.Write((byte)v);
         }
     }
 }

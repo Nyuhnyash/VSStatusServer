@@ -1,71 +1,99 @@
-﻿# Status Server
-Vintage Story mod that provides game server information 
-via popular [Server List Ping](https://wiki.vg/Server_List_Ping) protocol.
+# Status Server Revised
 
-## Configure
-1. Run the server with mod installed for the first time to generate default config file.
-2. Open TCP port specified in mod config (You can't share the same port with Vintage Story game server).
-3. <kbd>(Optional)</kbd> Add server icon (64x64, PNG only) path relative to VintagestoryServer executable (or use absolute path).
+Vintage Story mod that provides game server information via the popular [Server List Ping](https://wiki.vg/Server_List_Ping) protocol.
 
-**Default config file**
+This is an optimized and extended fork of the original [Status Server](https://github.com/Nyuhnyash/VSStatusServer) mod by Nyuhnyash.
+
+## Features
+
+- **Server List Ping protocol** — compatible with Minecraft server list tools
+- **Rate limiting** — per-IP request throttling for DDoS protection
+- **Parallel client handling** — non-blocking request processing
+- **Extension system** — modular architecture for custom status data
+- **Configurable** — timeouts, connection limits, and more
+
+## Installation
+
+1. Download the latest release (`StatusServerRevised_vX.X.X.zip`)
+2. Place it in your server's `Mods` folder
+3. Start the server to generate the config file
+4. Open TCP port specified in config (default: 25565)
+
+## Configuration
+
+Config file: `ModConfig/statusserverrevised.json`
+
 ```json
 {
     "Port": 25565,
     "IconFile": "server-icon.png",
-    "EnabledExtensions": [ "world" ]
+    "StartDelaySeconds": 10,
+    "EnabledExtensions": ["world"],   
+    "ClientTimeoutMs": 5000,
+    "Backlog": 10,
+    "MaxConcurrentConnections": 50,
+    "EnableRateLimiting": true,
+    "RateLimitWindowSeconds": 60,
+    "RateLimitMaxRequests": 30
 }
 ```
 
+### Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `Port` | 25565 | TCP port for the status server |
+| `IconFile` | server-icon.png | Server icon path (64x64 PNG) |
+| `StartDelaySeconds` | 10 | Delay before starting listener (prevents early request errors) |
+| `EnabledExtensions` | ["world"] | Enabled status extensions |
+| `ClientTimeoutMs` | 5000 | Client connection timeout |
+| `Backlog` | 10 | Maximum pending connections |
+| `MaxConcurrentConnections` | 50 | Maximum simultaneous connections |
+| `EnableRateLimiting` | true | Enable per-IP rate limiting |
+| `RateLimitWindowSeconds` | 60 | Rate limit time window |
+| `RateLimitMaxRequests` | 30 | Max requests per IP per window |
+
 ## Build
-- Set `VINTAGE_STORY` environment variable to your game directory.
-- Get ready-to-publish mod as zip archive
+
 ```shell
+# Set VINTAGE_STORY environment variable to your game directory
 dotnet build -c Release
 ```
 
-## Usage example
-There are plenty of libraries implementing the protocol: 
-[mcstatus](https://github.com/py-mine/mcstatus), 
-[mcutil](https://github.com/mcstatus-io/mcutil),
-etc.
-[More examples](https://wiki.vg/Server_List_Ping#Examples).
+Output: `bin/Release/StatusServerRevised_v1.0.0.zip`
 
-Ready-to-use services:
-https://mcsrvstat.us, 
-https://mcstatus.io,
-Telegram bot [@msmpbot](https://t.me/msmpbot).
+## Usage
 
-### Demonstration
+Compatible with any Server List Ping client:
+- [mcstatus](https://github.com/py-mine/mcstatus) (Python)
+- [mcutil](https://github.com/mcstatus-io/mcutil) (Go)
+- [More examples](https://wiki.vg/Server_List_Ping#Examples)
 
-#### Ping result
+Online services: [mcsrvstat.us](https://mcsrvstat.us), [mcstatus.io](https://mcstatus.io)
+
+### Example
+
 ```shell
-user@pc:~$ mcstatus localhost:25565 ping
-2.0397999905981123ms
-```
-
-#### Status result
-```shell
-user@pc:~$ mcstatus localhost:25565 status
-version: v1.18.0-pre.6 (protocol 2000)
+$ mcstatus localhost:25565 status
+version: v1.19.0 (protocol 2000)
 description: "Vintage Story Server"
-players: 1/16 ['Nyuhnyash (3e4a67aa-c4f1-f5f7-dffd-37e2fad5f74d)']
+players: 1/16 ['RainYbit (3e4a67aa-c4f1-f5f7-dffd-37e2fad5f74d)']
 ```
 
-Operate raw json to access non-standard extensions data.
+### JSON Response
 
-**Raw json**
-```json5
+```json
 {
     "version": {
         "protocol": 2000,
-        "name": "1.18.0-pre.6"
+        "name": "1.19.0"
     },
     "players": {
         "max": 16,
         "online": 1,
         "sample": [
             {
-                "name": "Nyuhnyash",
+                "name": "RainYbit",
                 "id": "3e4a67aa-c4f1-f5f7-dffd-37e2fad5f74d"
             }
         ]
@@ -74,9 +102,13 @@ Operate raw json to access non-standard extensions data.
         "text": "Vintage Story Server"
     },
     "favicon": "data:image/png;base64,<...>",
-// Non-standard extension
     "world": {
         "datetime": "2. May, Year 0, 17:31"
     }
 }
 ```
+
+## Credits
+
+- Original mod by [Nyuhnyash](https://github.com/Nyuhnyash/VSStatusServer)
+- Revised version by RainYbit

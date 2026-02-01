@@ -1,8 +1,8 @@
-﻿namespace StatusServer.ServerListPing.Standard
+namespace StatusServer.ServerListPing.Standard
 {
     public class DescriptionPayload
     {
-        public string Text;
+        public string Text { get; set; }
 
         public static implicit operator DescriptionPayload(string text)
         {
